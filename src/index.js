@@ -1,30 +1,52 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require('cors');
-const XLSX = require("xlsx");
 const bodyParser = require('body-parser');
-const path = require('path'); // Importa el módulo path
+const bcrypt = require('bcryptjs');
+const sequelize = require('./config/dbConfig');
+const User = require('./models/user');
 
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Data excel to json
-app.get('/datos', (req, res) => {
-    // Construye la ruta del archivo usando path.join para asegurarte de que funcione en cualquier sistema operativo
-    const filePath = path.join(__dirname, '..', 'datos.xlsx');
-    const excel = XLSX.readFile(filePath);
-    var nombreHoja = excel.SheetNames;
-    let datos = XLSX.utils.sheet_to_json(excel.Sheets[nombreHoja[0]]);
-    const jDatos = datos.map(dato => ({
-        ...dato,
-        FECHA: new Date((dato.FECHA - (25567 + 2)) * 86400 * 1000)
-    }));
-    res.json(jDatos);
-});
+// Ruta de login de prueba
+/*
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    console.log("Login request received:", req.body);
 
-const PORT = 3001;
+    try {
+        const user = await User.findOne({ where: { username } });
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).send('Contraseña incorrecta');
+        }
+
+        res.send('Login exitoso');
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).send('Error en el servidor');
+    }
+});
+*/
+
+// Inicialización y sincronización de la base de datos
+sequelize.sync({ force: false })
+    .then(() => {
+        console.log('Base de datos sincronizada');
+    })
+    .catch(error => {
+        console.error('Error al sincronizar la base de datos:', error);
+    });
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
