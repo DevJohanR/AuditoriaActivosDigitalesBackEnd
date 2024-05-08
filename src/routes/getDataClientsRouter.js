@@ -2,11 +2,11 @@
 
 const { Router } = require("express");
 
-const { getDataClientsController } = require('../controllers/getDataClientsController');
+const { getDataClientsHandler } = require('../handlers/getDataClientsHandler');
 
 
 const dataClients = Router();
 
-dataClients.get("/", getDataClientsController)
+dataClients.get("/", getDataClientsHandler)
 
 module.exports = dataClients;
